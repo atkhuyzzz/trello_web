@@ -1,9 +1,4 @@
-
-import Button from '@mui/material/Button'
-import { AccessAlarm, ThreeDRotation } from '@mui/icons-material'
-import  Typography  from '@mui/material/Typography'
 import {useColorScheme} from '@mui/material/styles'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
@@ -13,6 +8,8 @@ import {
   DarkModeOutlined as DarkModeOutlinedIcon, 
   SettingsBrightness as SettingsBrightnessIcon,
 } from '@mui/icons-material'
+import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
 
  function ModeSelect() {
   const { mode, setMode } = useColorScheme();
@@ -39,14 +36,14 @@ import {
           </div>
         </MenuItem>
         <MenuItem value="dark">
-          <div style={{display:'flex', alignItems: 'center', gap:'8px'}}>
+          <Box sx={{display:'flex', alignItems: 'center', gap:1  }}>
             <DarkModeOutlinedIcon fontSize='small'/> Dark
-          </div>
+          </Box>
         </MenuItem>
         <MenuItem value="system">
-          <div style={{display:'flex', alignItems: 'center', gap:'8px'}}>
+          <Box sx={{display:'flex', alignItems: 'center', gap:1  }}>
             <SettingsBrightnessIcon fontSize='small'/> System
-          </div>
+          </Box>
         </MenuItem>
       </Select>
     </FormControl>
@@ -55,22 +52,7 @@ import {
 
 
 
-function ModeToggle() {
-  const { mode, setMode } = useColorScheme();
-  // const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-  // const prefersLightMode = useMediaQuery('(prefers-color-scheme: light)');
-  // console.log('prefersDarkMode:',prefersDarkMode);
-  // console.log('prefersLightMode: ',prefersLightMode);
-  return (
-    <Button
-      onClick={() => {
-        setMode(mode === 'light' ? 'dark' : 'light');
-      }}
-    >
-      {mode === 'light' ? 'Turn dark' : 'Turn light'}
-    </Button>
-  );
-}
+
 
 
 
@@ -78,24 +60,35 @@ function App() {
   
 
   return (
-    <>
-    <ModeSelect/>
-    <hr />
-    <ModeToggle/>
-    <hr />
-    <div>atkhuyzzz</div>
-
-    <Typography variant="body2" color="text.secondary">heheh</Typography>
-
-      <Button variant="contained">Hello world</Button>
-      <Button variant="text">Text</Button>
-      <Button variant="contained">Contained</Button>
-      <Button variant="outlined">Outlined</Button>
-
-      <br/>
-      <AccessAlarm/>
-      <ThreeDRotation/>
-    </>
+    <Container disableGutters maxWidth={false} sx={{height:'100vh'}}>
+      <Box sx={{
+        backgroundColor: 'primary.light',
+        width:'100%',
+        height:(theme)=>theme.trello.appBarHeight,
+        display:'flex',
+        alignItems:'center'
+      }}>
+        <ModeSelect/>
+      </Box>
+      <Box sx={{
+        backgroundColor: 'primary.dark',
+        width:'100%',
+        height:(theme)=>theme.trello.boardBarHeight,
+        display:'flex',
+        alignItems:'center'
+      }}>
+        Board bar
+      </Box>
+      <Box sx={{
+        backgroundColor:'primary.main',
+        width:'100%',
+        height:(theme)=>`calc(100vh - ${theme.trello.appBarHeight} - ${theme.trello.boardBarHeight})`,
+        display:'flex',
+        alignItems:'center'
+      }}>
+        Board content
+      </Box>
+    </Container>
   )
 }
 
