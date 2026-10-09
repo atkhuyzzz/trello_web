@@ -34,7 +34,7 @@ function Profiles() {
             aria-expanded={open}
           >
             <Avatar 
-            sx={{ width: 34, height: 34 }}
+            sx={{ width: 36, height: 36 }}
             alt='heheboi'
             src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbGo8dg52UmLbeuSl4gcbM17I5TZveDrIcl7cnOIwYeg&s=10"
              />
