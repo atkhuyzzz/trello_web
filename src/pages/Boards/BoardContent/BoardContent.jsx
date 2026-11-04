@@ -4,8 +4,8 @@ import { mapOrder } from "~/utils/sorts"
 
 import {
   DndContext,
-  MouseSensor,
-  TouchSensor,
+  // MouseSensor,
+  // TouchSensor,
   useSensor,
   useSensors,
   DragOverlay,
@@ -16,6 +16,7 @@ import {
   // rectIntersection,
   getFirstCollision,
 } from "@dnd-kit/core"
+import { MouseSensor, TouchSensor } from "~/customLibraries/DndKitSensors"
 import { useEffect, useState, useCallback, useRef } from "react"
 import { arrayMove } from "@dnd-kit/sortable"
 
@@ -29,7 +30,7 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: "ACTIVE_DRAG_ITEM_TYPE_CARD",
 }
 
-function BoardContent({ board }) {
+function BoardContent({ board, createNewColumn, createNewCard }) {
   // const pointerSensor = useSensor(PointerSensor, {
   //   activationConstraint: { distance: 10 },
   // })
@@ -151,7 +152,6 @@ function BoardContent({ board }) {
           (card) => card._id,
         )
       }
-      console.log("nextColumns:", nextColumns)
 
       return nextColumns
     })
@@ -382,7 +382,11 @@ function BoardContent({ board }) {
           p: "10px 0",
         }}
       >
-        <ListColumn columns={orderedColumns} />
+        <ListColumn
+          columns={orderedColumns}
+          createNewColumn={createNewColumn}
+          createNewCard={createNewCard}
+        />
         <DragOverlay dropAnimation={customDropAnimation}>
           {!activeDragItemType && null}
           {activeDragItemId &&
