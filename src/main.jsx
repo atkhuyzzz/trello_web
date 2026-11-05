@@ -9,14 +9,25 @@ import { BrowserRouter } from "react-router-dom"
 //cấu hình react toastify
 import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
+import { ConfirmProvider } from "material-ui-confirm"
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
   <BrowserRouter>
     <CssVarsProvider theme={theme}>
-      <CssBaseline />
-      <App />
-      <ToastContainer position="bottom-left" theme="colored" />
+      <ConfirmProvider
+        defaultOptions={{
+          allowClose: false,
+          dialogProps: { maxWidth: "xs" },
+          buttonOrder: ["confirm", "cancel"],
+          cancellationButtonProps: { color: "inherit" },
+          confirmationButtonProps: { color: "secondary", variant: "outlined" },
+        }}
+      >
+        <CssBaseline />
+        <App />
+        <ToastContainer position="bottom-left" theme="colored" />
+      </ConfirmProvider>
     </CssVarsProvider>
   </BrowserRouter>,
   // </StrictMode>,

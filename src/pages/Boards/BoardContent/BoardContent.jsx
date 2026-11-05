@@ -1,6 +1,5 @@
 import Box from "@mui/material/Box"
 import ListColumn from "./ListColumns/ListColumns"
-import { mapOrder } from "~/utils/sorts"
 
 import {
   DndContext,
@@ -30,7 +29,15 @@ const ACTIVE_DRAG_ITEM_TYPE = {
   CARD: "ACTIVE_DRAG_ITEM_TYPE_CARD",
 }
 
-function BoardContent({ board, createNewColumn, createNewCard }) {
+function BoardContent({
+  board,
+  createNewColumn,
+  createNewCard,
+  moveColumns,
+  moveCardInTheSameColumn,
+  moveCardToDifferentColumn,
+  deleteColumnDetails,
+}) {
   // const pointerSensor = useSensor(PointerSensor, {
   //   activationConstraint: { distance: 10 },
   // })
@@ -62,7 +69,7 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
   const lastOverId = useRef(null)
 
   useEffect(() => {
-    setOrderedColumns(mapOrder(board?.columns, board?.columnOrderIds, "_id"))
+    setOrderedColumns(board.columns)
   }, [board])
 
   const findColumnByCardId = (cardId) => {
@@ -71,7 +78,7 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
     )
   }
 
-  //function chung xử lý cập nhật lại state trong trường hợp di chuyển giữa các Column khác nhau
+  //khởi tạo function chung xử lý cập nhật lại state trong trường hợp di chuyển giữa các Column khác nhau
   const moveCardBetweenDifferenctColumns = (
     overColumn,
     overCardId,
@@ -80,6 +87,7 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
     activeColumn,
     activeDraggingCardId,
     activeDraggingCardData,
+    triggerFrom,
   ) => {
     setOrderedColumns((prevColumns) => {
       const overCardIndex = overColumn?.cards?.findIndex(
@@ -153,6 +161,16 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
         )
       }
 
+      //khi func này được gọi từ handleDragEnd nghĩa là đã kéo thả xong và sau đó gọi API
+      if (triggerFrom === "handleDragEnd") {
+        moveCardToDifferentColumn(
+          activeDraggingCardId,
+          oldColumnWhenDraggingCard._id,
+          nextOverColumn._id,
+          nextColumns,
+        )
+      }
+
       return nextColumns
     })
   }
@@ -202,6 +220,7 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
         activeColumn,
         activeDraggingCardId,
         activeDraggingCardData,
+        "handleDragOver",
       )
     }
   }
@@ -234,6 +253,7 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
           activeColumn,
           activeDraggingCardId,
           activeDraggingCardData,
+          "handleDragEnd",
         )
       } else {
         //kéo thả card trong 1 column
@@ -253,6 +273,8 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
           newCardIndex,
         )
 
+        const dndOrderedCardIds = dndOrderedCards.map((card) => card._id)
+
         setOrderedColumns((prevColumns) => {
           const nextColumns = cloneDeep(prevColumns)
 
@@ -263,15 +285,21 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
 
           //cập nhật là card và cardOrderIds trong targetColummn
           targetColummn.cards = dndOrderedCards
-          targetColummn.cardOrderIds = dndOrderedCards.map((card) => card._id)
+          targetColummn.cardOrderIds = dndOrderedCardIds
           console.log("targetColummn", targetColummn)
 
           return nextColumns
         })
+
+        moveCardInTheSameColumn(
+          dndOrderedCards,
+          dndOrderedCardIds,
+          oldColumnWhenDraggingCard._id,
+        )
       }
     }
 
-    //xử lý kéo thả columns
+    //xử lý kéo thả columns trong 1 boardContent
     if (activeDragItemType === ACTIVE_DRAG_ITEM_TYPE.COLUMN) {
       if (active.id !== over.id) {
         // lấy vị trí cũ từ active
@@ -290,10 +318,9 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
           newColumnIndex,
         )
 
-        // console.log("dndOrderedColumns: ", dndOrderedColumns)
-        // console.log("dndOrderedColumns: ", dndOrderedColumnsIds)
-
         setOrderedColumns(dndOrderedColumns)
+
+        moveColumns(dndOrderedColumns)
       }
     }
 
@@ -386,6 +413,7 @@ function BoardContent({ board, createNewColumn, createNewCard }) {
           columns={orderedColumns}
           createNewColumn={createNewColumn}
           createNewCard={createNewCard}
+          deleteColumnDetails={deleteColumnDetails}
         />
         <DragOverlay dropAnimation={customDropAnimation}>
           {!activeDragItemType && null}

@@ -19,14 +19,14 @@ import { AddCard as AddCardIcon } from "@mui/icons-material"
 import { Button } from "@mui/material"
 import { DragHandle as DragHandleIcon } from "@mui/icons-material"
 import ListCards from "./ListCards/ListCards"
-import { mapOrder } from "~/utils/sorts"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 import TextField from "@mui/material/TextField"
 import { Close as CloseIcon } from "@mui/icons-material"
 import { toast } from "react-toastify"
+import { useConfirm } from "material-ui-confirm"
 
-function Column({ column, createNewCard }) {
+function Column({ column, createNewCard, deleteColumnDetails }) {
   const {
     attributes,
     listeners,
@@ -54,14 +54,14 @@ function Column({ column, createNewCard }) {
     setAnchorEl(null)
   }
 
-  const orderedCards = mapOrder(column?.cards, column?.cardOrderIds, "_id")
+  const orderedCards = column.cards
 
   const [openNewCardForm, setOpenNewCardForm] = useState(false)
   const toggleOpenNewCardForm = () => setOpenNewCardForm(!openNewCardForm)
 
   const [newCardTitle, setNewCardTitle] = useState("")
 
-  const addNewCard = async () => {
+  const addNewCard = () => {
     if (!newCardTitle) {
       toast.error("Please enter card title!", { position: "bottom-right" })
       return
@@ -75,11 +75,32 @@ function Column({ column, createNewCard }) {
 
     //Gọi API
 
-    await createNewCard(newCardData)
+    createNewCard(newCardData)
 
     //Đóng trạng thái thêm Column mới và clear input
     toggleOpenNewCardForm()
     setNewCardTitle("")
+  }
+
+  //xử lý xóa 1 column
+  const confirmDeleteColumn = useConfirm()
+  const handleDeleteColumn = (columnId) => {
+    confirmDeleteColumn({
+      title: "Delete Column?",
+      description:
+        "This action will permanently delete your Column and its Cards! Are you sure?",
+      confirmationText: "Confirm",
+      cancellationText: "Cancel",
+
+      // allowClose: false,
+      // dialogProps: { maxWidth: "xs" },
+      // cancellationButtonProps: { color: "inherit" },
+      // confirmationButtonProps: { color: "secondary", variant: "outlined" },
+    })
+      .then(() => {
+        deleteColumnDetails(column._id)
+      })
+      .catch(() => {})
   }
 
   return (
@@ -134,13 +155,22 @@ function Column({ column, createNewCard }) {
               anchorEl={anchorEl}
               open={open}
               onClose={handleClose}
+              onClick={handleClose}
               MenuListProps={{
                 "aria-labelledby": "basic-button-dropdown",
               }}
             >
-              <MenuItem>
+              <MenuItem
+                onClick={toggleOpenNewCardForm}
+                sx={{
+                  "&:hover": {
+                    color: "success.light",
+                    "& .add-card-icon": { color: "success.light" },
+                  },
+                }}
+              >
                 <ListItemIcon>
-                  <AddCardIcon fontSize="small" />
+                  <AddCardIcon className="add-card-icon" fontSize="small" />
                 </ListItemIcon>
                 <ListItemText>Add new card</ListItemText>
               </MenuItem>
@@ -163,11 +193,22 @@ function Column({ column, createNewCard }) {
                 <ListItemText>Paste</ListItemText>
               </MenuItem>
               <Divider />
-              <MenuItem>
+              <MenuItem
+                onClick={handleDeleteColumn}
+                sx={{
+                  "&:hover": {
+                    color: "warning.dark",
+                    "& .delete-forever-icon": { color: "warning.dark" },
+                  },
+                }}
+              >
                 <ListItemIcon>
-                  <DeleteForeverIcon fontSize="small" />
+                  <DeleteForeverIcon
+                    className="delete-forever-icon"
+                    fontSize="small"
+                  />
                 </ListItemIcon>
-                <ListItemText>Remove this column</ListItemText>
+                <ListItemText>Delete this column</ListItemText>
               </MenuItem>
               <MenuItem>
                 <ListItemIcon>
