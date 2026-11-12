@@ -25,8 +25,18 @@ import TextField from "@mui/material/TextField"
 import { Close as CloseIcon } from "@mui/icons-material"
 import { toast } from "react-toastify"
 import { useConfirm } from "material-ui-confirm"
+import { createNewCardAPI, deleteColumnDetailsAPI } from "~/apis"
+import { cloneDeep } from "lodash"
+import {
+  updateCurrentActiveBoard,
+  selectCurrentActiveBoard,
+} from "~/redux/activeBoard/activeBoardSlice"
+import { useDispatch, useSelector } from "react-redux"
 
-function Column({ column, createNewCard, deleteColumnDetails }) {
+function Column({ column }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
+
   const {
     attributes,
     listeners,
@@ -61,7 +71,7 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
 
   const [newCardTitle, setNewCardTitle] = useState("")
 
-  const addNewCard = () => {
+  const addNewCard = async () => {
     if (!newCardTitle) {
       toast.error("Please enter card title!", { position: "bottom-right" })
       return
@@ -73,9 +83,28 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
       columnId: column._id,
     }
 
-    //Gọi API
+    //gọi API tạo mới card và làm mới dữ liệu State Board
+    const createdCard = await createNewCardAPI({
+      ...newCardData,
+      boardId: board._id,
+    })
+    console.log("createdCard:", createdCard)
 
-    createNewCard(newCardData)
+    //cập nhật state board
+    const newBoard = cloneDeep(board)
+    const columnToUpdate = newBoard.columns.find(
+      (column) => column._id === createdCard.columnId,
+    )
+    if (columnToUpdate) {
+      if (columnToUpdate.cards.some((card) => card.FE_PlaceholderCard)) {
+        columnToUpdate.cards = [createdCard]
+        columnToUpdate.cardOrderIds = [createdCard._id]
+      } else {
+        columnToUpdate.cards.push(createdCard)
+        columnToUpdate.cardOrderIds.push(createdCard._id)
+      }
+    }
+    dispatch(updateCurrentActiveBoard(newBoard))
 
     //Đóng trạng thái thêm Column mới và clear input
     toggleOpenNewCardForm()
@@ -84,7 +113,7 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
 
   //xử lý xóa 1 column
   const confirmDeleteColumn = useConfirm()
-  const handleDeleteColumn = (columnId) => {
+  const handleDeleteColumn = () => {
     confirmDeleteColumn({
       title: "Delete Column?",
       description:
@@ -98,7 +127,17 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
       // confirmationButtonProps: { color: "secondary", variant: "outlined" },
     })
       .then(() => {
-        deleteColumnDetails(column._id)
+        //update cho chuẩn dữ liệu state board
+        const newBoard = { ...board }
+        newBoard.columns = newBoard.columns.filter((c) => c._id !== column._id)
+        newBoard.columnOrderIds = newBoard.columnOrderIds.filter(
+          (_id) => _id !== column._id,
+        )
+        dispatch(updateCurrentActiveBoard(newBoard))
+        //Gọi API
+        deleteColumnDetailsAPI(column._id).then((res) => {
+          toast.success(res?.deleteResult)
+        })
       })
       .catch(() => {})
   }
@@ -295,6 +334,7 @@ function Column({ column, createNewCard, deleteColumnDetails }) {
               />
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Button
+                  className="interceptor-loading"
                   data-no-dnd="true"
                   onClick={addNewCard}
                   variant="contained"

@@ -10,19 +10,25 @@ import { useState } from "react"
 import TextField from "@mui/material/TextField"
 import { Close as CloseIcon } from "@mui/icons-material"
 import { toast } from "react-toastify"
+import { createNewColumnAPI } from "~/apis"
+import { generatePlaceholderCard } from "~/utils/formatters"
+import { cloneDeep } from "lodash"
+import {
+  updateCurrentActiveBoard,
+  selectCurrentActiveBoard,
+} from "~/redux/activeBoard/activeBoardSlice"
+import { useDispatch, useSelector } from "react-redux"
 
-function ListColumns({
-  columns,
-  createNewColumn,
-  createNewCard,
-  deleteColumnDetails,
-}) {
+function ListColumns({ columns }) {
+  const dispatch = useDispatch()
+  const board = useSelector(selectCurrentActiveBoard)
+
   const [openNewCloumnForm, setOpenNewCloumnForm] = useState(false)
   const toggleOpenNewCloumnForm = () => setOpenNewCloumnForm(!openNewCloumnForm)
 
   const [newColumnTitle, setNewColumnTitle] = useState("")
 
-  const addNewColumn = () => {
+  const addNewColumn = async () => {
     if (!newColumnTitle) {
       toast.error("Please enter column title!")
       return
@@ -32,7 +38,23 @@ function ListColumns({
       title: newColumnTitle,
     }
 
-    createNewColumn(newColumnData)
+    //gọi API tạo mới column và làm mới dữ liệu State Board
+    const createdColumn = await createNewColumnAPI({
+      ...newColumnData,
+      boardId: board._id,
+    })
+
+    createdColumn.cards = [generatePlaceholderCard(createdColumn)]
+    createdColumn.cardOrderIds = [generatePlaceholderCard(createdColumn)._id]
+
+    //cập nhật state board
+    // const newBoard = { ...board }
+    const newBoard = cloneDeep(board)
+    newBoard.columns.push(createdColumn)
+    newBoard.columnOrderIds.push(createdColumn._id)
+
+    //cập nhật dữ liệu vào trong Redux Store
+    dispatch(updateCurrentActiveBoard(newBoard))
 
     //Đóng trạng thái thêm Column mới và clear input
     toggleOpenNewCloumnForm()
@@ -57,14 +79,7 @@ function ListColumns({
         }}
       >
         {columns?.map((column) => {
-          return (
-            <Column
-              key={column._id}
-              column={column}
-              createNewCard={createNewCard}
-              deleteColumnDetails={deleteColumnDetails}
-            />
-          )
+          return <Column key={column._id} column={column} />
         })}
 
         {/* Box Add new colum */}
@@ -129,6 +144,7 @@ function ListColumns({
             />
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Button
+                className="interceptor-loading"
                 onClick={addNewColumn}
                 variant="contained"
                 color="success"
