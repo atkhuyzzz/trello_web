@@ -5,12 +5,10 @@ import { VpnLock as VpnLockIcon } from "@mui/icons-material"
 import { AddToDrive as AddToDriveIcon } from "@mui/icons-material"
 import { Bolt as BoltIcon } from "@mui/icons-material"
 import { FilterList as FilterListIcon } from "@mui/icons-material"
-import Avatar from "@mui/material/Avatar"
-import AvatarGroup from "@mui/material/AvatarGroup"
 import { Tooltip } from "@mui/material"
-import Button from "@mui/material/Button"
-import { PersonAdd as PersonAddIcon } from "@mui/icons-material"
 import { capitalizeFirstLetter } from "~/utils/formatters"
+import BoardUserGroup from "~/pages/Boards/BoardBar/BoardUserGroup"
+import InviteBoardUser from "./InviteBoardUser"
 
 const MENU_STYLES = {
   color: "white",
@@ -78,65 +76,10 @@ function BoardBar({ board }) {
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-        <Button
-          variant="outlined"
-          startIcon={<PersonAddIcon />}
-          sx={{
-            color: "white",
-            borderColor: "white",
-            "&:hover": {
-              borderColor: "white",
-            },
-          }}
-        >
-          Invite
-        </Button>
-        <AvatarGroup
-          max={4}
-          sx={{
-            gap: "10px",
-            "& .MuiAvatar-root": {
-              width: 34,
-              height: 34,
-              fontSize: 16,
-              border: "none",
-              color: "white",
-              cursor: "pointer",
-              "&:first-of-type": { bgcolor: "#a4b0be" },
-            },
-          }}
-        >
-          <Tooltip title="heheboi">
-            <Avatar
-              alt="heheboi"
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbGo8dg52UmLbeuSl4gcbM17I5TZveDrIcl7cnOIwYeg&s=10"
-            />
-          </Tooltip>
-          <Tooltip title="heheboi">
-            <Avatar
-              alt="heheboi"
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbGo8dg52UmLbeuSl4gcbM17I5TZveDrIcl7cnOIwYeg&s=10"
-            />
-          </Tooltip>
-          <Tooltip title="heheboi">
-            <Avatar
-              alt="heheboi"
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbGo8dg52UmLbeuSl4gcbM17I5TZveDrIcl7cnOIwYeg&s=10"
-            />
-          </Tooltip>
-          <Tooltip title="heheboi">
-            <Avatar
-              alt="heheboi"
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbGo8dg52UmLbeuSl4gcbM17I5TZveDrIcl7cnOIwYeg&s=10"
-            />
-          </Tooltip>
-          <Tooltip title="heheboi">
-            <Avatar
-              alt="heheboi"
-              src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbGo8dg52UmLbeuSl4gcbM17I5TZveDrIcl7cnOIwYeg&s=10"
-            />
-          </Tooltip>
-        </AvatarGroup>
+        {/* Xử lý mới user làm thành viên của board */}
+        <InviteBoardUser boardId={board._id} />
+        {/*Xử lý hiển thị danh sách thành viên của board*/}
+        <BoardUserGroup boardUsers={board?.FE_allUsers} />
       </Box>
     </Box>
   )

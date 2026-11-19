@@ -9,8 +9,15 @@ import { Comment as CommentIcon } from "@mui/icons-material"
 import { Attachment as AttachmentIcon } from "@mui/icons-material"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { useDispatch } from "react-redux"
+import {
+  updateCurrentActiveCard,
+  showModalActiveCard,
+} from "~/redux/activeCard/activeCardSlice"
 
 function Card({ card }) {
+  const dispatch = useDispatch()
+
   const {
     attributes,
     listeners,
@@ -37,8 +44,17 @@ function Card({ card }) {
     )
   }
 
+  const setActiveCard = () => {
+    //Cập nhật data cho cái activeCard trong redux
+    dispatch(updateCurrentActiveCard(card))
+
+    //Hiện Modal ActiveCard lên
+    dispatch(showModalActiveCard())
+  }
+
   return (
     <MuiCard
+      onClick={setActiveCard}
       ref={setNodeRef}
       style={dndKitCardStyles}
       {...attributes}

@@ -115,3 +115,43 @@ export const verifyUserAPI = async (data) => {
   )
   return response.data
 }
+
+export const refreshTokenAPI = async () => {
+  const response = await authorizedAxiosInstance.get(
+    `${API_ROOT}/users/refresh_token`,
+  )
+  return response.data
+}
+
+export const fetchBoardsAPI = async (searchPath) => {
+  const response = await authorizedAxiosInstance.get(
+    `${API_ROOT}/boards${searchPath}`,
+  )
+  return response.data
+}
+
+export const createNewBoardAPI = async (data) => {
+  const response = await authorizedAxiosInstance.post(
+    `${API_ROOT}/boards`,
+    data,
+  )
+  toast.success("Board created successfully")
+  return response.data
+}
+
+export const updateCardDetailsAPI = async (cardId, updatedData) => {
+  const response = await authorizedAxiosInstance.put(
+    `${API_ROOT}/cards/${cardId}`,
+    updatedData,
+  )
+  return response.data
+}
+
+export const inviteUserToBoardAPI = async (data) => {
+  const response = await authorizedAxiosInstance.post(
+    `${API_ROOT}/invitations/board`,
+    data,
+  )
+  toast.success("User invited to board successfully!")
+  return response.data
+}
